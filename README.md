@@ -1,211 +1,273 @@
-# Flutter CRUD Operation
+<div align="center">
 
-A Flutter product inventory app that demonstrates complete **Create, Read, Update, and Delete (CRUD)** operations with **GetX**, **Firebase Cloud Firestore**, and **Firebase Storage**. Manage product details and photos, search inventory, and switch between light and dark themes.
+<img src="docs/assets/banner.svg" alt="Flutter CRUD Operation — Flutter + Firebase Firestore product inventory" width="100%" />
 
-> Firebase must be configured and its database and storage rules must allow the requested operation for cloud data to work. Without a working Firebase configuration, the app can still open, but products cannot be loaded or saved.
+<h3>A polished, real-time product inventory app built with Flutter, GetX and Firebase.</h3>
 
-## Table of contents
+<p>
+  <a href="https://github.com/SirAseef/Flutter-Crud-Operation/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/SirAseef/Flutter-Crud-Operation/actions/workflows/ci.yml/badge.svg" /></a>
+  <img alt="Flutter" src="https://img.shields.io/badge/Flutter-stable-02569B?logo=flutter&logoColor=white" />
+  <img alt="Dart" src="https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart&logoColor=white" />
+  <img alt="Firebase" src="https://img.shields.io/badge/Firebase-Firestore%20%7C%20Storage-FFCA28?logo=firebase&logoColor=black" />
+  <img alt="GetX" src="https://img.shields.io/badge/State-GetX-8A2BE2" />
+  <img alt="Platforms" src="https://img.shields.io/badge/Platforms-Android%20%7C%20iOS%20%7C%20Web-4CAF50" />
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-green.svg" /></a>
+</p>
 
-- [Features](#features)
-- [Built with](#built-with)
-- [Getting started](#getting-started)
-- [Firebase setup](#firebase-setup)
-- [Running and testing](#running-and-testing)
-- [Firestore data model](#firestore-data-model)
-- [Project structure](#project-structure)
-- [Troubleshooting](#troubleshooting)
-- [Security](#security)
+<p>
+  <a href="#-features">Features</a> •
+  <a href="#-architecture">Architecture</a> •
+  <a href="#-getting-started">Getting started</a> •
+  <a href="#-screenshots">Screenshots</a> •
+  <a href="#-roadmap">Roadmap</a> •
+  <a href="#-author">Author</a>
+</p>
 
-## Features
+</div>
 
-- **Create products:** Enter a product name, description, category, SKU, price, quantity, and availability status.
-- **Add product photos:** Pick an image to upload to Firebase Storage, or provide an image URL.
-- **Browse products:** See the live product list and total inventory count on the dashboard.
-- **View details:** Open a product to see its saved information and image.
-- **Update products:** Edit a product and its photo while preserving the original creation date.
-- **Delete products:** Confirm before removing a product and its associated uploaded photo.
-- **Search inventory:** Search by product name, description, category, or SKU.
-- **Responsive layout:** Adaptive dashboard and product cards for phone, tablet, and wider screens.
-- **Light and dark themes:** Switch themes from the dashboard.
-- **Visible connection state:** See Firebase connection/setup status and relevant loading or error states.
+---
 
-## Built with
+> **Create, browse, search, edit and delete products — with photos — and watch every change sync instantly across devices through Cloud Firestore.**
 
-| Technology | Purpose |
-| --- | --- |
-| Flutter and Dart | Cross-platform app and UI |
-| GetX | Reactive state management and navigation |
-| Firebase Core | Firebase initialization |
-| Cloud Firestore | Live product records |
-| Firebase Storage | Uploaded product photos |
-| `image_picker` | Selecting a product photo |
+## ✨ Features
 
-## Getting started
+| | Feature | Details |
+|---|---|---|
+| ➕ | **Create** | Name, description, category, SKU, price, stock quantity and availability, with form validation |
+| 🖼️ | **Product photos** | Pick from the gallery (auto-compressed, uploaded to Firebase Storage) **or** paste a public image URL |
+| ⚡ | **Real-time list** | Firestore `snapshots()` stream — adds, edits and deletes appear instantly, no refresh |
+| 🔎 | **Instant search** | Case-insensitive filtering across name, description, category and SKU |
+| ✏️ | **Update** | Edit any field or swap the photo; the original `createdAt` is preserved and the old image is cleaned up |
+| 🗑️ | **Delete** | Confirmation dialog; removes the Firestore document **and** its Storage image |
+| 📱 | **Responsive UI** | 1/2/3-column grid, adaptive FAB and two-column form on wide screens — phone, tablet and desktop/web |
+| 🌗 | **Light & dark themes** | Material 3 theme generated from a single seed colour, toggled from the app bar |
+| 🛡️ | **Graceful failure** | App still launches without Firebase config and shows a clear *Setup needed* / *Connection issue* status; network calls have timeouts and roll back orphaned uploads |
+| 🎬 | **Animated splash** | Branded gradient splash screen with a scale-in animation |
 
-### Requirements
+## 🧰 Tech stack
 
-- Flutter SDK and Dart SDK versions compatible with the constraints in [`pubspec.yaml`](pubspec.yaml).
-- A Firebase project with **Cloud Firestore** and **Firebase Storage** enabled for cloud CRUD and image uploads.
-- An Android emulator/device, iOS simulator/device, or Chrome.
-- Xcode to build or run the iOS app; iOS builds require macOS.
+| Layer | Technology |
+|---|---|
+| UI | Flutter · Material 3 |
+| Language | Dart 3 |
+| State management & routing | [GetX](https://pub.dev/packages/get) (`GetxController`, `.obs`, `Obx`, named routes) |
+| Database | [Cloud Firestore](https://pub.dev/packages/cloud_firestore) (real-time streams) |
+| File storage | [Firebase Storage](https://pub.dev/packages/firebase_storage) |
+| Media | [image_picker](https://pub.dev/packages/image_picker) |
+| Quality | `flutter_lints` + extra rules · widget & unit tests · GitHub Actions CI |
 
-### Install and run
+## 🏗️ Architecture
 
-1. Clone the repository and open its folder:
+The app follows a simple, layered architecture: **Views** render state and forward user intent, **Controllers** own reactive state, the **Service** is the only layer that talks to Firebase, and the **Model** maps Firestore documents into immutable Dart objects.
 
-   ```bash
-   git clone https://github.com/SirAseef/Flutter-Crud-Operation.git
-   cd Flutter-Crud-Operation
-   ```
+```mermaid
+flowchart LR
+    subgraph UI["🖥️ Views (lib/views)"]
+        S[SplashPage]
+        H[HomePage<br/>dashboard · search · grid]
+        F[ProductFormPage<br/>create / edit]
+        V[ProductViewPage<br/>details · delete]
+    end
 
-2. Fetch the Flutter dependencies:
+    subgraph State["🧠 State — GetX (lib/controllers)"]
+        PC[ProductController<br/>products.obs · searchText.obs<br/>isLoading · connectionStatus]
+        AC[AppController<br/>isDarkMode.obs]
+    end
 
-   ```bash
-   flutter pub get
-   ```
+    subgraph Data["🔌 Data (lib/services + lib/models)"]
+        PS[ProductService]
+        M[Product model]
+    end
 
-3. Configure Firebase as described in [Firebase setup](#firebase-setup).
+    subgraph Firebase["☁️ Firebase"]
+        FS[(Cloud Firestore<br/>items collection)]
+        ST[(Firebase Storage<br/>items/&#123;id&#125;/…)]
+    end
 
-4. Start the app on a connected device or emulator:
+    H -- Obx --> PC
+    F -- saveItem --> PC
+    V -- deleteItem --> PC
+    H -- toggleTheme --> AC
+    PC --> PS
+    PS -- "snapshots() stream" --> FS
+    PS -- "set(merge) / delete" --> FS
+    PS -- "putData / delete" --> ST
+    FS -. "real-time updates" .-> PS
+    PS -. "List&lt;Product&gt;" .-> PC
+    PS --- M
+```
 
-   ```bash
-   flutter run
-   ```
+**Save flow:** form validates → `ProductController.saveItem` → `ProductService.saveProduct` uploads the image (if any, 60 s timeout) → writes the document with `merge: true` and server timestamps → deletes the replaced image → the Firestore stream pushes the updated list back to every listening screen.
 
-   To select a target explicitly, use (for example):
+## 🗂️ Data model
 
-   ```bash
-   flutter devices
-   flutter run -d chrome
-   ```
+Documents live in the Firestore collection **`items`** (document ID = product ID).
 
-5. From the dashboard, tap **Add product** to create a record. Select a photo or enter an image URL, complete the product details, and save. Open a product to view, edit, or delete it.
+| Field | Type | Notes |
+|---|---|---|
+| `name` | `string` | Required, trimmed |
+| `description` | `string` | Optional |
+| `category` | `string` | `Other` · `Electronics` · `Fashion` · `Home` · `Books` · `Food` |
+| `sku` | `string` | Optional product code |
+| `price` | `number` | ≥ 0 |
+| `quantity` | `number` (int) | ≥ 0 |
+| `status` | `string` | `Available` · `Out of stock` · `Coming soon` |
+| `imageUrl` | `string` | Storage download URL or external image link |
+| `imagePath` | `string` | Storage object path; empty for external links |
+| `createdAt` | `timestamp` | Server time, set on create only |
+| `updatedAt` | `timestamp` | Server time, set on every save |
 
-## Firebase setup
+Uploaded photos are stored at `items/{productId}/{timestamp}_{fileName}` in Firebase Storage.
 
-Firebase app configuration is platform-specific and is **not committed** to this repository, because those files contain API keys. The generated files `lib/firebase_options.dart`, `android/app/google-services.json`, `ios/Runner/GoogleService-Info.plist`, and `firebase.json` are git-ignored. Placeholder templates are provided instead:
+## 📁 Project structure
 
-| Template | Real file (git-ignored) |
-| --- | --- |
+```text
+lib/
+├── main.dart                     # Firebase init, GetX controller registration, routes
+├── app_theme.dart                # Material 3 light/dark themes from one seed colour
+├── firebase_options.dart.example # Template — real file is generated & git-ignored
+├── controllers/
+│   ├── app_controller.dart       # Theme mode state
+│   └── product_controller.dart   # Product list, search, loading/error, CRUD actions
+├── models/
+│   └── product.dart              # Immutable Product + Firestore mapping
+├── services/
+│   └── product_service.dart      # All Firestore & Storage access
+└── views/
+    ├── splash_page.dart          # Animated splash
+    ├── home_page.dart            # Dashboard, search, responsive product grid
+    ├── product_form_page.dart    # Create / edit form with photo picker
+    └── product_view_page.dart    # Product details, edit & delete
+test/
+├── widget_test.dart              # Navigation, form & responsive-layout widget tests
+└── product_controller_test.dart  # Search/filter & setup-state unit tests
+.github/                          # CI workflow, issue & PR templates
+docs/assets/                      # README artwork
+```
+
+## 🚀 Getting started
+
+### Prerequisites
+
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (latest **stable**; Dart version per [`pubspec.yaml`](pubspec.yaml))
+- A [Firebase](https://console.firebase.google.com/) project with **Cloud Firestore** and **Firebase Storage** enabled
+- Android emulator/device, iOS simulator (macOS + Xcode), or Chrome
+
+### 1 — Clone & install
+
+```bash
+git clone https://github.com/SirAseef/Flutter-Crud-Operation.git
+cd Flutter-Crud-Operation
+flutter pub get
+```
+
+### 2 — Connect your Firebase project
+
+Firebase client config is **never committed**. Templates are provided instead:
+
+| Template (committed) | Real file (git-ignored) |
+|---|---|
 | [`lib/firebase_options.dart.example`](lib/firebase_options.dart.example) | `lib/firebase_options.dart` |
 | [`android/app/google-services.json.example`](android/app/google-services.json.example) | `android/app/google-services.json` |
 | [`firebase.json.example`](firebase.json.example) | `firebase.json` |
 
-The recommended way is to let FlutterFire generate the real files for your own project (steps below). Alternatively, copy each template to its real filename and fill in the values from your Firebase Console. **The app will not compile until `lib/firebase_options.dart` exists.** Never commit these files; also restrict your API keys in Google Cloud Console (by app package/bundle ID or HTTP referrer, and to the Firebase APIs you use).
-
-1. Create or select a Firebase project in the [Firebase Console](https://console.firebase.google.com/).
-2. Enable **Cloud Firestore** and create a database.
-3. Enable **Firebase Storage** and create a storage bucket.
-4. Install and sign in to the Firebase CLI if you have not already:
-
-   ```bash
-   npm install -g firebase-tools
-   firebase login
-   ```
-
-5. Activate FlutterFire CLI and configure the platforms you intend to run:
-
-   ```bash
-   dart pub global activate flutterfire_cli
-   flutterfire configure
-   ```
-
-   Select your Firebase project and register the requested Android, iOS, and/or web apps. Keep the Android application ID and iOS bundle ID consistent with the native app configuration. FlutterFire generates platform options; do not copy another project's configuration.
-
-6. Fetch dependencies and run:
-
-   ```bash
-   flutter pub get
-   flutter run
-   ```
-
-The dashboard should show **Connected** after the Firestore products stream succeeds. The app uses the Firestore collection named `items`; it creates product documents when saving new records. Firebase rules must grant the intended access for reads, writes, and image uploads/deletes.
-
-## Running and testing
-
-Run static analysis and widget tests from the project root:
+**Recommended — generate them with FlutterFire:**
 
 ```bash
-flutter analyze
-flutter test
+npm install -g firebase-tools        # once
+firebase login
+dart pub global activate flutterfire_cli
+flutterfire configure                # pick your project + Android / iOS / Web
 ```
 
-Build a release Android APK:
+**Alternative — fill the templates by hand:**
 
 ```bash
+cp lib/firebase_options.dart.example lib/firebase_options.dart
+cp android/app/google-services.json.example android/app/google-services.json
+cp firebase.json.example firebase.json
+# then replace the YOUR_* placeholders with values from the Firebase Console
+```
+
+> ℹ️ The app won't compile until `lib/firebase_options.dart` exists. With placeholder values it still launches and shows **Setup needed** instead of crashing.
+
+### 3 — Run
+
+```bash
+flutter devices          # list targets
+flutter run              # default device
+flutter run -d chrome    # web
+```
+
+When the dashboard chip shows **Connected**, tap **Add product** and start managing your catalogue.
+
+### Quality checks & builds
+
+```bash
+flutter analyze          # static analysis (also run in CI)
+flutter test             # widget + unit tests (also run in CI)
+
 flutter build apk --release
-```
-
-Build the web app:
-
-```bash
 flutter build web
+flutter build ios        # macOS + Xcode signing required
 ```
 
-For iOS, use a Mac with Xcode and valid Apple signing configuration:
+## 📸 Screenshots
 
-```bash
-flutter build ios
-```
+<!-- TODO: capture real screenshots (e.g. `flutter run -d chrome`, then save PNGs to docs/screenshots/) and replace the placeholders below. -->
 
-## Firestore data model
+| Splash | Dashboard | Add / edit product | Product details |
+|:---:|:---:|:---:|:---:|
+| _coming soon_ | _coming soon_ | _coming soon_ | _coming soon_ |
 
-Product documents are stored in the `items` collection:
+| Dark mode | Search | Tablet / web layout |
+|:---:|:---:|:---:|
+| _coming soon_ | _coming soon_ | _coming soon_ |
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `name` | String | Product name |
-| `description` | String | Product description |
-| `category` | String | Product category |
-| `sku` | String | Stock keeping unit |
-| `price` | Number | Product price |
-| `quantity` | Integer | Available stock quantity |
-| `status` | String | Availability status |
-| `imageUrl` | String | Download URL or externally provided image URL |
-| `imagePath` | String | Firebase Storage object path; empty for external image URLs |
-| `createdAt` | Timestamp | Creation time, set for a new product |
-| `updatedAt` | Timestamp | Last save/update time |
+## 🔐 Security
 
-Uploaded photos are saved under `items/{productId}/` in Firebase Storage. The app uses the Firestore document ID as the product ID.
+- `firebase_options.dart`, `google-services.json`, `GoogleService-Info.plist` and `firebase.json` are **git-ignored**; only `.example` templates live in the repo.
+- Firebase client keys identify your project but **do not protect data** — use restrictive **Firestore** and **Storage Security Rules**, and add **Firebase Authentication** / **App Check** before production. Never ship open test-mode rules.
+- Restrict API keys in Google Cloud Console (by package / bundle ID or HTTP referrer, and to the Firebase APIs you use).
 
-## Project structure
+Found a vulnerability? Please follow [SECURITY.md](SECURITY.md) and report it privately.
 
-```text
-lib/
-├── controllers/
-│   ├── app_controller.dart       # Reactive light/dark theme state
-│   └── product_controller.dart   # Product list, search, and CRUD state
-├── models/
-│   └── product.dart              # Product model and Firestore conversion
-├── services/
-│   └── product_service.dart      # Firestore and Storage operations
-├── views/
-│   ├── home_page.dart            # Dashboard and searchable product list
-│   ├── product_form_page.dart    # Create/edit product form
-│   ├── product_view_page.dart    # Product details
-│   └── splash_page.dart          # Startup screen
-├── app_theme.dart                # Light and dark themes
-├── firebase_options.dart.example # Template; generate firebase_options.dart locally (git-ignored)
-└── main.dart                     # Firebase initialization and routes
-test/
-└── widget_test.dart              # Widget and responsive layout tests
-```
+## 🛣️ Roadmap
 
-## Troubleshooting
+- [ ] Firebase Authentication with per-user product ownership
+- [ ] Production-ready Firestore & Storage security rules in the repo
+- [ ] Sorting and category / status filters
+- [ ] Pagination for large catalogues
+- [ ] Currency & locale-aware price formatting
+- [ ] Offline-first indicators and retry queue
+- [ ] Low-stock alerts and inventory insights
+- [ ] Live web demo via Firebase Hosting
+- [ ] Real screenshots and a short demo GIF
 
-- **“Firebase setup required”** — Register the app in your Firebase project and run `flutterfire configure`. Ensure you have enabled Firestore and Storage.
-- **Firestore connection or permission error** — Check your internet connection, confirm the Firebase project and app configuration match, and review Firestore security rules.
-- **Photo upload or delete error** — Confirm Firebase Storage is enabled and its rules permit the intended operation. Uploaded images require Storage access.
-- **Android app does not match Firebase configuration** — Check the Android application ID in `android/app/build.gradle.kts` matches the Android app registered in Firebase, then regenerate the configuration.
-- **iOS app does not match Firebase configuration** — Check the iOS bundle ID matches the registered Firebase iOS app and regenerate FlutterFire configuration.
-- **Dependencies or generated files are stale** — Run `flutter clean`, then `flutter pub get`, and try again.
+## 🤝 Contributing
 
-## Security
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md), open an issue to discuss bigger changes, and make sure `flutter analyze` and `flutter test` pass before opening a pull request.
 
-This is a sample app and intentionally does **not** include user authentication. Do not put real or private product data in a publicly accessible database or storage bucket. Before using it with real users:
+## 📄 License
 
-- Add Firebase Authentication.
-- Deploy restrictive Firestore and Storage rules that authorize each user for only the records and files they are allowed to access.
-- Do not use open/test rules in production.
-- Never commit Firebase config files with real API keys; restrict keys in Google Cloud Console.
-- Keep Firebase project configuration matched to a project you own or are authorized to use. Client configuration files are not a replacement for security rules.
+Released under the [MIT License](LICENSE) © 2026 Aseef Ahmed.
+
+## 👤 Author
+
+<table>
+  <tr>
+    <td>
+      <strong>Aseef Ahmed</strong><br/>
+      Founder, <strong>Alpha Group</strong> · Software Engineer & Data Scientist<br/><br/>
+      <a href="https://github.com/SirAseef"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-SirAseef-181717?logo=github&logoColor=white" /></a>
+      <a href="https://www.linkedin.com/in/aseef-ahmed-6ab6b7196"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-Aseef%20Ahmed-0A66C2?logo=linkedin&logoColor=white" /></a>
+      <a href="mailto:aseefahmed@aptechnorth.edu.pk"><img alt="Email" src="https://img.shields.io/badge/Email-aseefahmed%40aptechnorth.edu.pk-EA4335?logo=gmail&logoColor=white" /></a>
+    </td>
+  </tr>
+</table>
+
+<div align="center">
+
+If this project helped you, consider giving it a ⭐ — it really helps!
+
+</div>

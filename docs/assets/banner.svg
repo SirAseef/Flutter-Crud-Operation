@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-label="Flutter CRUD Operation — Flutter + Firebase Firestore product inventory">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0F172A"/>
+      <stop offset="0.55" stop-color="#111827"/>
+      <stop offset="1" stop-color="#465FFF"/>
+    </linearGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.26"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.06"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#54C5F8"/>
+      <stop offset="1" stop-color="#FFCA28"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="320" rx="24" fill="url(#bg)"/>
+  <circle cx="1190" cy="20" r="130" fill="#FFFFFF" fill-opacity="0.06"/>
+  <circle cx="60" cy="330" r="150" fill="#465FFF" fill-opacity="0.22"/>
+  <!-- app tile -->
+  <rect x="96" y="92" width="136" height="136" rx="36" fill="url(#tile)" stroke="#FFFFFF" stroke-opacity="0.22" stroke-width="1.5"/>
+  <g transform="translate(124 120)" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M40 4 L76 22 L76 60 L40 78 L4 60 L4 22 Z"/>
+    <path d="M4 22 L40 40 L76 22"/>
+    <path d="M40 40 L40 78"/>
+  </g>
+  <text x="272" y="148" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="58" font-weight="800" fill="#FFFFFF" letter-spacing="0.5">Flutter CRUD Operation</text>
+  <rect x="274" y="168" width="120" height="5" rx="2.5" fill="url(#accent)"/>
+  <text x="274" y="214" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="23" fill="#FFFFFF" fill-opacity="0.85">Real-time product inventory · Flutter + GetX + Firebase Firestore &amp; Storage</text>
+  <g font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#FFFFFF">
+    <rect x="274" y="240" width="96" height="34" rx="17" fill="#FFFFFF" fill-opacity="0.12"/><text x="322" y="263" text-anchor="middle">Create</text>
+    <rect x="380" y="240" width="96" height="34" rx="17" fill="#FFFFFF" fill-opacity="0.12"/><text x="428" y="263" text-anchor="middle">Read</text>
+    <rect x="486" y="240" width="96" height="34" rx="17" fill="#FFFFFF" fill-opacity="0.12"/><text x="534" y="263" text-anchor="middle">Update</text>
+    <rect x="592" y="240" width="96" height="34" rx="17" fill="#FFFFFF" fill-opacity="0.12"/><text x="640" y="263" text-anchor="middle">Delete</text>
+  </g>
+</svg>

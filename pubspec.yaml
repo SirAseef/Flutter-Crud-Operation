@@ -1,5 +1,5 @@
 name: easy_flutter_crud
-description: "Simple GetX and Firebase Firestore CRUD app."
+description: "Flutter + Firebase Firestore CRUD app — real-time product inventory with GetX state management and Firebase Storage images."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

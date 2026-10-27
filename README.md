@@ -83,7 +83,15 @@ A Flutter product inventory app that demonstrates complete **Create, Read, Updat
 
 ## Firebase setup
 
-Firebase app configuration is platform-specific. The repository includes generated FlutterFire options in [`lib/firebase_options.dart`](lib/firebase_options.dart), Android configuration in [`android/app/google-services.json`](android/app/google-services.json), and FlutterFire project metadata in [`firebase.json`](firebase.json). These files refer to a particular Firebase project; use them only if you are authorized to access that project. To use your own Firebase project, generate and replace the configuration with your own.
+Firebase app configuration is platform-specific and is **not committed** to this repository, because those files contain API keys. The generated files `lib/firebase_options.dart`, `android/app/google-services.json`, `ios/Runner/GoogleService-Info.plist`, and `firebase.json` are git-ignored. Placeholder templates are provided instead:
+
+| Template | Real file (git-ignored) |
+| --- | --- |
+| [`lib/firebase_options.dart.example`](lib/firebase_options.dart.example) | `lib/firebase_options.dart` |
+| [`android/app/google-services.json.example`](android/app/google-services.json.example) | `android/app/google-services.json` |
+| [`firebase.json.example`](firebase.json.example) | `firebase.json` |
+
+The recommended way is to let FlutterFire generate the real files for your own project (steps below). Alternatively, copy each template to its real filename and fill in the values from your Firebase Console. **The app will not compile until `lib/firebase_options.dart` exists.** Never commit these files; also restrict your API keys in Google Cloud Console (by app package/bundle ID or HTTP referrer, and to the Firebase APIs you use).
 
 1. Create or select a Firebase project in the [Firebase Console](https://console.firebase.google.com/).
 2. Enable **Cloud Firestore** and create a database.
@@ -177,7 +185,7 @@ lib/
 │   ├── product_view_page.dart    # Product details
 │   └── splash_page.dart          # Startup screen
 ├── app_theme.dart                # Light and dark themes
-├── firebase_options.dart         # FlutterFire platform options
+├── firebase_options.dart.example # Template; generate firebase_options.dart locally (git-ignored)
 └── main.dart                     # Firebase initialization and routes
 test/
 └── widget_test.dart              # Widget and responsive layout tests
@@ -199,4 +207,5 @@ This is a sample app and intentionally does **not** include user authentication.
 - Add Firebase Authentication.
 - Deploy restrictive Firestore and Storage rules that authorize each user for only the records and files they are allowed to access.
 - Do not use open/test rules in production.
+- Never commit Firebase config files with real API keys; restrict keys in Google Cloud Console.
 - Keep Firebase project configuration matched to a project you own or are authorized to use. Client configuration files are not a replacement for security rules.

@@ -66,3 +66,13 @@ app.*.map.json
 *.jks
 *.keystore
 firebase-debug.log
+
+# Firebase client configuration (contains API keys) - generate locally with
+# `flutterfire configure`; templates are committed as *.example
+/lib/firebase_options.dart
+/android/app/google-services.json
+/ios/Runner/GoogleService-Info.plist
+/ios/firebase_app_id_file.json
+/macos/Runner/GoogleService-Info.plist
+/web/firebase-config.js
+/firebase.json

@@ -1,14 +1,14 @@
 {
   "project_info": {
-    "project_number": "995156717867",
-    "firebase_url": "https://flutter-crud-45810-default-rtdb.firebaseio.com",
-    "project_id": "flutter-crud-45810",
-    "storage_bucket": "flutter-crud-45810.firebasestorage.app"
+    "project_number": "YOUR_PROJECT_NUMBER",
+    "firebase_url": "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+    "project_id": "YOUR_PROJECT_ID",
+    "storage_bucket": "YOUR_PROJECT_ID.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:995156717867:android:e1880b568cb58fed68556e",
+        "mobilesdk_app_id": "YOUR_ANDROID_APP_ID",
         "android_client_info": {
           "package_name": "com.example.easy_flutter_crud"
         }
@@ -16,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "REMOVED_GOOGLE_API_KEY"
+          "current_key": "YOUR_ANDROID_API_KEY"
         }
       ],
       "services": {
